@@ -1,14 +1,17 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
-
-# Set the working directory in the container
+# fitst stage fot build
+FROM python:3.9-alpine as builder
 WORKDIR /usr/src/app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Copy the current directory contents into the container at /usr/src/app
+# second stage for run
+FROM python:3.9-alpine
+WORKDIR /usr/src/app
+COPY --from=builder /root/.local /root/.local
 COPY . .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir requests
+# set system variable 
+ENV PATH=/root/.local:$PATH
 
 # Run app.py when the container launches
 CMD ["python", "./app.py"]
